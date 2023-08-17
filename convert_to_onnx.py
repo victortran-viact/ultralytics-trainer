@@ -73,7 +73,7 @@ if __name__ == "__main__":
     )
 
     # task = Task.get_task(task_id="dd8df89d27554c4e988aa328bfaec275")
-    task = Task.get_current_task()
+    task = Task.current_task()
     print(task)
     task.upload_artifact(
         name=output_name,
