@@ -1,4 +1,4 @@
-from clearml import Model
+from clearml import Model, Task
 from ultralytics import YOLO
 
 
@@ -65,9 +65,17 @@ if __name__ == "__main__":
     model_path = None
     if args.model_path: 
         model_path = args.model_path
-    elif args.model_id :
+    elif args.model_id:
         model_path = download_model(args.model_id)
     
-    export_to_onnx(
+    output_name = export_to_onnx(
         model_path=model_path,
+    )
+
+    # task = Task.get_task(task_id="dd8df89d27554c4e988aa328bfaec275")
+    task = Task.get_current_task()
+    print(task)
+    task.upload_artifact(
+        name=output_name,
+        artifact_object=f"./{output_name}"
     )
