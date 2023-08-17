@@ -101,9 +101,11 @@ def get_dataset_from_storage(dataset_id: str) -> str:
 
     dataset = Dataset.get(dataset_id=dataset_id)
 
-    folderpath = f"./datasets/{dataset.name}"
-    if not os.path.exists(folderpath):
-        os.mkdir(folderpath)
+    dataset_dir = os.path.join(os.getcwd(), "datasets")
+    folderpath = os.path.join(dataset_dir,dataset.name) 
+
+    os.makedirs(dataset_dir, exist_ok=True)
+    os.makedirs(folderpath, exist_ok=True)
 
     dataset.get_mutable_local_copy(
         target_folder=folderpath,
