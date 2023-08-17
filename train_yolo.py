@@ -1,3 +1,4 @@
+import os
 from clearml import Dataset
 from ultralytics import YOLO
 
@@ -15,7 +16,7 @@ def get_model_name_from_choice(model_name: str, model_variant: str) -> str:
     return mapping.get((model_name, model_variant), "")
 
 
-def get_dataset_from_storage(dataset_id: str) -> str:
+def get_dataset_zip_from_storage(dataset_id: str) -> str:
     """
         Extract dataset from ClearML storage & return yaml filepath
         ```
@@ -77,6 +78,45 @@ def get_dataset_from_storage(dataset_id: str) -> str:
     return yaml_filepath
 
 
+def get_dataset_from_storage(dataset_id: str) -> str:
+    """
+            ```
+        yolov5/
+            temp/
+                {dataset_name}.zip     
+            datasets/ <- NOTE: this is requried in ultraalytics config 
+                {dataset_name}/    
+                    train/
+                    test/
+                    val/
+                    *.yaml -> return filepath of *.yaml
+        ```
+    """
+    from pathlib import Path
+
+    def _get_yaml_files(folder_path: str) -> list[Path]:
+        folder_path = Path(folder_path)
+        yaml_files = folder_path.glob("*.yaml")
+        return list(yaml_files)
+
+    dataset = Dataset.get(dataset_id=dataset_id)
+
+    folderpath = f"./datasets/{dataset.name}"
+    if not os.path.exists(folderpath):
+        os.mkdir(folderpath)
+
+    dataset.get_mutable_local_copy(
+        target_folder=folderpath,
+        overwrite=True
+    )
+
+    # Assumpe there only 1 *.yaml file
+    yaml_filepath: Path = _get_yaml_files(folderpath)[0]
+    yaml_filepath: str = str(yaml_filepath.absolute())
+
+    return yaml_filepath
+
+
 def train_yolo(
         dataset_id: str,
         model_version: str = "yolov5s",
@@ -85,6 +125,7 @@ def train_yolo(
         epochs: int = 10,
 ) -> None:
 
+    # yaml_filepath = get_dataset_zip_from_storage(dataset_id=dataset_id)
     yaml_filepath = get_dataset_from_storage(dataset_id=dataset_id)
 
     print(f"Dataset is stored at {yaml_filepath}")
@@ -116,9 +157,10 @@ if __name__ == "__main__":
         "--imgsz", default=640, help="Image size"
     )
     args.add_argument(
-        "--epochs", default=10, help="Epochs"
+        "--epochs", default=10, help="Epochs", type=int
     )
     args = args.parse_args()
+    
     train_yolo(
         dataset_id=args.dataset_id,
         model_version=args.model_version,
