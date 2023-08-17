@@ -1,2 +1,5 @@
 clearml==1.12.1
+clearml[s3]==1.12.1
+boto3>=1.9
 ultralytics==8.0.149
+onnx>=1.12.0
