@@ -72,10 +72,15 @@ if __name__ == "__main__":
         model_path=model_path,
     )
 
-    # task = Task.get_task(task_id="dd8df89d27554c4e988aa328bfaec275")
+    print(f"ONNX model stored at: {output_name}")
+    with open("./yolov5su.onnx","rb") as f: 
+        model = f.read()
+
+    # to upload with clearML
+    print(f"Uploading to clearML server")
     task = Task.current_task()
-    print(task)
     task.upload_artifact(
         name=output_name,
-        artifact_object=f"./{output_name}"
+        # artifact_object=f"./{output_name}"
+        artifact_object=model
     )
