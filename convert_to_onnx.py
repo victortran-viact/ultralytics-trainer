@@ -4,12 +4,14 @@ from ultralytics import YOLO
 
 def download_model(model_id: str) -> str:
     '''Download model from ClearML Registry'''
+    print(f"Download `model_id` {model_id}")
     model = Model(model_id=model_id)
-    tmp_path = model.get_local_copy(
-        extract_archive="./"
-    )
+    tmp_path = model.get_local_copy(extract_archive=True, force_download=True)
+    if not tmp_path: 
+        raise ValueError("Could not download model, you must mistake InputModel & OutputModel")
+    print(f"Model stored at {tmp_path}")
     return tmp_path
-
+    
 
 # TODO: 
 def upload_model_to_clearml() -> str:
@@ -40,11 +42,11 @@ if __name__ == "__main__":
     args = argparse.ArgumentParser()
 
     args.add_argument(
-        "--model_id", help="Model from ClearML Registry", default=None
+        "--model_id", help="Model from ClearML Registry", type=str, default=None
     )
 
     args.add_argument(
-        "--model_path", help="Model form local storage", default=None
+        "--model_path", help="Model form local storage", default=None, type=str
     )
 
     args.add_argument(
@@ -64,7 +66,7 @@ if __name__ == "__main__":
     if args.model_path: 
         model_path = args.model_path
     elif args.model_id :
-        model_path = download_model(args.model_path)
+        model_path = download_model(args.model_id)
     
     export_to_onnx(
         model_path=model_path,
