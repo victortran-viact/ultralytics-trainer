@@ -1,21 +1,10 @@
-from clearml import Model, Task
+from clearml import Task
 from ultralytics import YOLO
 
+from utils.clearml_utils import download_model
+   
 
-def download_model(model_id: str) -> str:
-    '''Download model from ClearML Registry'''
-    print(f"Download `model_id` {model_id}")
-    model = Model(model_id=model_id)
-    tmp_path = model.get_local_copy(extract_archive=True, force_download=True)
-    if not tmp_path: 
-        raise ValueError("Could not download model, you must mistake InputModel & OutputModel")
-    print(f"Model stored at {tmp_path}")
-    return tmp_path
-    
 
-# TODO: 
-def upload_model_to_clearml() -> str:
-    return
 
 
 def export_to_onnx(model_path: str, format: str = 'onnx', imgsz: str = 640) -> str:
