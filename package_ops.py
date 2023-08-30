@@ -45,7 +45,11 @@ def default_engine_config(config_path: Path, imgsz=[640, 640]) -> None:
 
 def package_ops(
     model_type: str, version: str, label_list: list[str], output_path: Path
-) -> Path:
+) -> tuple[str, str]:
+    '''
+        Return: zip_filepath, zip_filepath 
+            full_path, filename
+    '''
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir)
 
@@ -70,7 +74,7 @@ def package_ops(
             zipf.write(onnx_model_filepath,
                        arcname=f"{model_type}/{version}/weights/{model_type}.onnx")
 
-        return str(zip_filepath.absolute()) 
+        return str(zip_filepath.absolute()), str(zip_filepath)
 
 
 if __name__ == "__main__":
@@ -96,24 +100,23 @@ if __name__ == "__main__":
     output_path = export_to_onnx(model_path=model_path)
     print(f"ONNX model stored at: {output_path}")
 
-    zip_filepath = package_ops(
+    zip_filepath, name = package_ops(
         model_type=args.model_type,
         version=args.version,
         label_list=args.label_list,
         output_path=output_path,
     )
-    print(f"Package stored at: {zip_filepath}")
+    print(f"Package stored at: {name} {zip_filepath}")
 
     # to upload with clearML
     task = Task.current_task()
     if task:
         print(f"Found current task {task.id}")
         print(f"Uploading to clearML server")
-        with open(zip_filepath, "rb") as f:
-            zip_file = f.read()
+
         task.upload_artifact(
-            name=zip_filepath,
-            artifact_object=zip_file
+            name=name,
+            artifact_object=zip_filepath
         )
         print("Complete upload package to clearML server")
     else:
