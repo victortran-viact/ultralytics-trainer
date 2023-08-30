@@ -4,9 +4,6 @@ from ultralytics import YOLO
 from utils.clearml_utils import download_model
    
 
-
-
-
 def export_to_onnx(model_path: str, format: str = 'onnx', imgsz: str = 640) -> str:
     '''
     Ultralytics ONNX args: imgsz, half, dynamic, simplify, opset
@@ -23,7 +20,7 @@ def export_to_onnx(model_path: str, format: str = 'onnx', imgsz: str = 640) -> s
         format=format,
         imgsz=imgsz
     )
-
+    print(f"ONNX model stored at: {output_name}")
     return output_name
 
 if __name__ == "__main__":

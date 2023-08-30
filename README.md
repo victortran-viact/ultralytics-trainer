@@ -39,11 +39,19 @@ python convert_to_onnx.py \
 ## Evaluate only: 
 ```
 python test_yolo.py \ 
-    --dataset_id e5bd66f0631d4aec914ba542e7eedcd3 
+    --dataset_id e5bd66f0631d4aec914ba542e7eedcd3 \ 
     --model_id 2166c61eaa2749d0ba68111ae3faf9bc
 ```
 
+## Package OPS: 
+```
+python package_ops.py \ 
+    --model_id 2166c61eaa2749d0ba68111ae3faf9bc \
+    --model_type danger_zone \ 
+    --version 1.0.0 \
+    --label_list Person Car 
+```
+
+
 
 ## Benchmark (TODO)
-```
-```
