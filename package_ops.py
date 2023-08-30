@@ -70,7 +70,7 @@ def package_ops(
             zipf.write(onnx_model_filepath,
                        arcname=f"{model_type}/{version}/weights/{model_type}.onnx")
 
-        return zip_filepath
+        return str(zip_filepath.absolute()) 
 
 
 if __name__ == "__main__":
