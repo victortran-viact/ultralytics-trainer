@@ -1,4 +1,5 @@
 import os
+
 from clearml import Dataset
 from ultralytics import YOLO
 
@@ -22,9 +23,9 @@ def get_dataset_zip_from_storage(dataset_id: str) -> str:
         ```
         yolov5/
             temp/
-                {dataset_name}.zip     
-            datasets/ <- NOTE: this is requried in ultraalytics config 
-                {dataset_name}/    
+                {dataset_name}.zip
+            datasets/ <- NOTE: this is requried in ultraalytics config
+                {dataset_name}/
                     train/
                     test/
                     val/
@@ -83,9 +84,9 @@ def get_dataset_from_storage(dataset_id: str) -> str:
             ```
         yolov5/
             temp/
-                {dataset_name}.zip     
-            datasets/ <- NOTE: this is requried in ultraalytics config 
-                {dataset_name}/    
+                {dataset_name}.zip
+            datasets/ <- NOTE: this is requried in ultraalytics config
+                {dataset_name}/
                     train/
                     test/
                     val/
@@ -102,7 +103,10 @@ def get_dataset_from_storage(dataset_id: str) -> str:
     dataset = Dataset.get(dataset_id=dataset_id)
 
     dataset_dir = os.path.join(os.getcwd(), "datasets")
-    folderpath = os.path.join(dataset_dir,dataset.name) 
+    folderpath = os.path.join(dataset_dir,dataset.name)
+
+    from ultralytics import settings
+    settings.update({'dataset_dirs': dataset_dir})
 
     os.makedirs(dataset_dir, exist_ok=True)
     os.makedirs(folderpath, exist_ok=True)
@@ -162,7 +166,7 @@ if __name__ == "__main__":
         "--epochs", default=10, help="Epochs", type=int
     )
     args = args.parse_args()
-    
+
     train_yolo(
         dataset_id=args.dataset_id,
         model_version=args.model_version,
