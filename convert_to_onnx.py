@@ -1,17 +1,19 @@
+from pathlib import Path
+
 from clearml import Task
 from ultralytics import YOLO
 
 from utils.clearml_utils import download_model
-   
+
 
 def export_to_onnx(model_path: str, format: str = 'onnx', imgsz: str = 640) -> str:
     '''
     Ultralytics ONNX args: imgsz, half, dynamic, simplify, opset
     Reference to the document for more details
-    Example saved position: 
+    Example saved position:
         {workspace}
             /utils
-                {model_weights}.onnx <- Ultralytics YOLO stored convert model here 
+                {model_weights}.onnx <- Ultralytics YOLO stored convert model here
                 train_yolo.py
                 ...
     '''
@@ -49,24 +51,33 @@ if __name__ == "__main__":
         raise ValueError("`model_id` or `model_path` must be provided")
 
     model_path = None
-    if args.model_path: 
+    if args.model_path:
         model_path = args.model_path
     elif args.model_id:
         model_path = download_model(args.model_id)
-    
+
     output_path = export_to_onnx(
         model_path=model_path,
     )
 
     print(f"ONNX model stored at: {output_path}")
-    with open(output_path,"rb") as f: 
-        model = f.read()
+    # with open(output_path,"rb") as f:
+    #     model = f.read()
 
     # to upload with clearML
     print(f"Uploading to clearML server")
     task = Task.current_task()
+
+    # Move output_path to tmp dir
+    temp_dir = Path(f"/tmp/{task.id}")
+
+    temp_dir.mkdir(parents=True, exist_ok=True)
+
+    onnx_model_path = temp_dir / Path(output_path).name
+    Path(output_path).rename(onnx_model_path)
+
     task.upload_artifact(
-        name=output_path,
-        # artifact_object=f"./{output_name}"
-        artifact_object=model
+        name="onnx_model",
+        artifact_object=str(onnx_model_path),
+
     )
