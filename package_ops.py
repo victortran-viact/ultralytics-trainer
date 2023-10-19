@@ -7,6 +7,7 @@ from pathlib import Path
 from clearml import Task
 
 from convert_to_onnx import download_model, export_to_onnx
+from utils.security import encrypt_model
 
 
 def label_list_to_txt(label_list: list[str], labels_txt_path: Path) -> None:
@@ -112,6 +113,11 @@ if __name__ == "__main__":
         "--label_list", help="List of labels", nargs="+", default=None, type=str)
     args_parser.add_argument(
         "--version", help="Model version", default="1.0.0", type=str)
+    args_parser.add_argument(
+        "--encrypt",
+        help="Encrypt model",
+        action="store_true",
+    )
     args = args_parser.parse_args()
 
     if not args.model_id and not args.model_path:
@@ -121,6 +127,16 @@ if __name__ == "__main__":
 
     output_path = export_to_onnx(model_path=model_path)
     print(f"ONNX model stored at: {output_path}")
+
+    print(f"ONNX model stored at: {output_path}")
+
+    if args.encrypt:
+        # Encrypt model
+        encrypt_model(
+            input_path=output_path,
+            output_path=output_path,
+        )
+        print(f"Encrypted model stored at: {output_path}")
 
     zip_filepath, name = package_ops(
         model_arch=args.model_arch,
@@ -136,9 +152,17 @@ if __name__ == "__main__":
         print(f"Found current task {task.id}")
         print(f"Uploading to clearML server")
 
+        # Move output_path to tmp dir
+        temp_dir = Path(f"/tmp/{task.id}")
+
+        temp_dir.mkdir(parents=True, exist_ok=True)
+
+        new_path = temp_dir / Path(zip_filepath).name
+        Path(output_path).rename(new_path)
+
         task.upload_artifact(
             name=name,
-            artifact_object=zip_filepath,
+            artifact_object=new_path,
         )
         print("Complete upload package to clearML server")
     else:

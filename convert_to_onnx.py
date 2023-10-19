@@ -46,6 +46,12 @@ if __name__ == "__main__":
         "--imgsz", default=640, help="Image size"
     )
 
+    args.add_argument(
+        "--encrypt",
+        help="Encrypt model",
+        action="store_true",
+    )
+
     args = args.parse_args()
 
     if not args.model_id and not args.model_path:
@@ -63,12 +69,13 @@ if __name__ == "__main__":
 
     print(f"ONNX model stored at: {output_path}")
 
-    # Encrypt model
-    encrypt_model(
-        input_path=output_path,
-        output_path=output_path,
-    )
-    print(f"Encrypted model stored at: {output_path}")
+    if args.encrypt:
+        # Encrypt model
+        encrypt_model(
+            input_path=output_path,
+            output_path=output_path,
+        )
+        print(f"Encrypted model stored at: {output_path}")
 
     # to upload with clearML
     print(f"Uploading to clearML server")
