@@ -63,12 +63,13 @@ def package_ops(
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir)
 
-        version_dir = temp_dir_path / version
-        configs_dir = version_dir / "configs"
+        output_dir = temp_dir_path / f"{model_arch}_{version}"
+
+        configs_dir = output_dir / "configs"
         configs_dir.mkdir(parents=True, exist_ok=True)
-        weights_dir = version_dir / "weights"
+        weights_dir = output_dir / "weights"
         weights_dir.mkdir(parents=True, exist_ok=True)
-        labels_txt_path = version_dir / "labels.txt"
+        labels_txt_path = output_dir / "labels.txt"
         config_path = configs_dir / "default_config.json"
 
         label_list_to_txt(label_list, labels_txt_path)
@@ -79,9 +80,9 @@ def package_ops(
         with zipfile.ZipFile(zip_filepath, "w") as zipf:
             zipf.write(labels_txt_path, arcname="labels.txt")
             zipf.write(
-                config_path, arcname=f"{model_arch}/{version}/configs/default_config.json")
+                config_path, arcname=f"configs/default_config.json")
             zipf.write(onnx_model_filepath,
-                       arcname=f"{model_arch}/{version}/weights/best.onnx")
+                       arcname=f"weights/best.onnx")
 
         return str(zip_filepath.absolute()), str(zip_filepath)
 
