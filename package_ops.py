@@ -1,8 +1,9 @@
 import argparse
 import json
-import zipfile
 import tempfile
+import zipfile
 from pathlib import Path
+
 from clearml import Task
 
 from convert_to_onnx import download_model, export_to_onnx
@@ -14,9 +15,15 @@ def label_list_to_txt(label_list: list[str], labels_txt_path: Path) -> None:
         f.write(labels_txt)
 
 
-def default_engine_config(config_path: Path, imgsz=[640, 640]) -> None:
+def default_engine_config(
+    config_path: Path,
+    imgsz=[640, 640],
+    model_arch="yolov5s",
+    classes=[0]
+) -> None:
     config = {
         "model": {
+            "arch": model_arch,
             "train": {},
             "inference": {
                 "imgsz": imgsz,
@@ -24,7 +31,7 @@ def default_engine_config(config_path: Path, imgsz=[640, 640]) -> None:
                 "iou_thres": 0.45,
                 "max_det": 1000,
                 "device": "0",
-                "classes": [0],
+                "classes": classes,
                 "inference_bs": 1,
                 "agnostic_nms": False,
                 "augment": False,
@@ -44,17 +51,19 @@ def default_engine_config(config_path: Path, imgsz=[640, 640]) -> None:
 
 
 def package_ops(
-    model_type: str, version: str, label_list: list[str], output_path: Path
+    mmodel_arch: str,
+    version: str,
+    label_list:
+    list[str], output_path: Path
 ) -> tuple[str, str]:
     '''
-        Return: zip_filepath, zip_filepath 
+        Return: zip_filepath, zip_filepath
             full_path, filename
     '''
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir)
 
-        version_dir = temp_dir_path / model_type / version
-        version_dir.mkdir(parents=True, exist_ok=True)
+        version_dir = temp_dir_path / version
         configs_dir = version_dir / "configs"
         configs_dir.mkdir(parents=True, exist_ok=True)
         weights_dir = version_dir / "weights"
@@ -66,13 +75,13 @@ def package_ops(
         default_engine_config(config_path=config_path)
         onnx_model_filepath = output_path
 
-        zip_filepath = Path(f"{model_type}_{version}.zip")
+        zip_filepath = Path(f"{mmodel_arch}_{version}.zip")
         with zipfile.ZipFile(zip_filepath, "w") as zipf:
             zipf.write(labels_txt_path, arcname="labels.txt")
             zipf.write(
-                config_path, arcname=f"{model_type}/{version}/configs/default_config.json")
+                config_path, arcname=f"{mmodel_arch}/{version}/configs/default_config.json")
             zipf.write(onnx_model_filepath,
-                       arcname=f"{model_type}/{version}/weights/{model_type}.onnx")
+                       arcname=f"{mmodel_arch}/{version}/weights/best.onnx")
 
         return str(zip_filepath.absolute()), str(zip_filepath)
 
@@ -85,7 +94,19 @@ if __name__ == "__main__":
     args_parser.add_argument(
         "--model_path", help="Model from local storage", default=None, type=str)
     args_parser.add_argument(
-        "--model_type", help="Model type", default=None, type=str)
+        "--model_arch",
+        help="Model type",
+        default=None,
+        type=str,
+        choices=[
+            "yolov5s",
+            "yolov5m",
+            "yolov5l",
+            "yolov8s",
+            "yolov8m",
+            "yolov8l",
+        ],
+    )
     args_parser.add_argument(
         "--label_list", help="List of labels", nargs="+", default=None, type=str)
     args_parser.add_argument(
@@ -101,7 +122,7 @@ if __name__ == "__main__":
     print(f"ONNX model stored at: {output_path}")
 
     zip_filepath, name = package_ops(
-        model_type=args.model_type,
+        model_arch=args.model_type,
         version=args.version,
         label_list=args.label_list,
         output_path=output_path,
@@ -116,7 +137,7 @@ if __name__ == "__main__":
 
         task.upload_artifact(
             name=name,
-            artifact_object=zip_filepath
+            artifact_object=zip_filepath,
         )
         print("Complete upload package to clearML server")
     else:
