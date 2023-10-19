@@ -122,7 +122,7 @@ if __name__ == "__main__":
     print(f"ONNX model stored at: {output_path}")
 
     zip_filepath, name = package_ops(
-        model_arch=args.model_type,
+        model_arch=args.model_arch,
         version=args.version,
         label_list=args.label_list,
         output_path=output_path,
