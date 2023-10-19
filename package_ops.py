@@ -51,7 +51,7 @@ def default_engine_config(
 
 
 def package_ops(
-    mmodel_arch: str,
+    model_arch: str,
     version: str,
     label_list:
     list[str], output_path: Path
@@ -75,13 +75,13 @@ def package_ops(
         default_engine_config(config_path=config_path)
         onnx_model_filepath = output_path
 
-        zip_filepath = Path(f"{mmodel_arch}_{version}.zip")
+        zip_filepath = Path(f"{model_arch}_{version}.zip")
         with zipfile.ZipFile(zip_filepath, "w") as zipf:
             zipf.write(labels_txt_path, arcname="labels.txt")
             zipf.write(
-                config_path, arcname=f"{mmodel_arch}/{version}/configs/default_config.json")
+                config_path, arcname=f"{model_arch}/{version}/configs/default_config.json")
             zipf.write(onnx_model_filepath,
-                       arcname=f"{mmodel_arch}/{version}/weights/best.onnx")
+                       arcname=f"{model_arch}/{version}/weights/best.onnx")
 
         return str(zip_filepath.absolute()), str(zip_filepath)
 
