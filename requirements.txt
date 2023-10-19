@@ -3,3 +3,6 @@ clearml[s3]==1.12.1
 boto3>=1.9
 ultralytics==8.0.149
 onnx>=1.12.0
+pycryptodome==3.18.0
+cryptography==41.0.2
+# onnxruntime==1.16.1

@@ -4,6 +4,7 @@ from clearml import Task
 from ultralytics import YOLO
 
 from utils.clearml_utils import download_model
+from utils.security import encrypt_model
 
 
 def export_to_onnx(model_path: str, format: str = 'onnx', imgsz: str = 640) -> str:
@@ -61,8 +62,13 @@ if __name__ == "__main__":
     )
 
     print(f"ONNX model stored at: {output_path}")
-    # with open(output_path,"rb") as f:
-    #     model = f.read()
+
+    # Encrypt model
+    encrypt_model(
+        input_path=output_path,
+        output_path=output_path,
+    )
+    print(f"Encrypted model stored at: {output_path}")
 
     # to upload with clearML
     print(f"Uploading to clearML server")
