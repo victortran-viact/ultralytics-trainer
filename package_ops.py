@@ -129,25 +129,25 @@ if __name__ == "__main__":
 
     model_path = args.model_path or download_model(args.model_id)
 
-    output_path = export_to_onnx(model_path=model_path)
+    onnx_model_path = export_to_onnx(model_path=model_path)
 
-    print(f"ONNX model stored at: {output_path}")
+    print(f"ONNX model stored at: {onnx_model_path}")
 
-    print(f"ONNX model stored at: {output_path}")
+    print(f"ONNX model stored at: {onnx_model_path}")
 
     if args.encrypt:
         # Encrypt model
         encrypt_model(
-            input_path=output_path,
-            output_path=output_path,
+            input_path=onnx_model_path,
+            output_path=onnx_model_path,
         )
-        print(f"Encrypted model stored at: {output_path}")
+        print(f"Encrypted model stored at: {onnx_model_path}")
 
     zip_filepath, name = package_ops(
         model_arch=args.model_arch,
         version=args.version,
         label_list=args.label_list,
-        output_path=output_path,
+        model_path=onnx_model_path,
     )
     print(f"Package stored at: {name} {zip_filepath}")
 
@@ -164,7 +164,7 @@ if __name__ == "__main__":
 
         task.upload_artifact(
             name="exported_onnx_model",
-            artifact_object=output_path,
+            artifact_object=onnx_model_path,
         )
         print("Complete upload package to clearML server")
     else:
