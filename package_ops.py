@@ -158,8 +158,13 @@ if __name__ == "__main__":
         print(f"Uploading to clearML server")
 
         task.upload_artifact(
-            name="exported_model",
+            name="exported_model_zip",
             artifact_object=zip_filepath,
+        )
+
+        task.upload_artifact(
+            name="exported_onnx_model",
+            artifact_object=output_path,
         )
         print("Complete upload package to clearML server")
     else:
