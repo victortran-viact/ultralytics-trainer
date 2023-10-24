@@ -79,7 +79,7 @@ def package_ops(
             config_path=config_path,
             model_arch=model_arch,
         )
-        onnx_model_filepath = model_path,
+        onnx_model_filepath = model_path
 
         zip_filepath = Path(f"{model_arch}_{version}.zip")
         with zipfile.ZipFile(zip_filepath, "w") as zipf:
