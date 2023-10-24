@@ -74,7 +74,10 @@ def package_ops(
         config_path = configs_dir / "default_config.json"
 
         label_list_to_txt(label_list, labels_txt_path)
-        default_engine_config(config_path=config_path)
+        default_engine_config(
+            config_path=config_path,
+            model_arch=model_arch,
+        )
         onnx_model_filepath = output_path
 
         zip_filepath = Path(f"{model_arch}_{version}.zip")
@@ -126,6 +129,7 @@ if __name__ == "__main__":
     model_path = args.model_path or download_model(args.model_id)
 
     output_path = export_to_onnx(model_path=model_path)
+
     print(f"ONNX model stored at: {output_path}")
 
     print(f"ONNX model stored at: {output_path}")
@@ -152,17 +156,9 @@ if __name__ == "__main__":
         print(f"Found current task {task.id}")
         print(f"Uploading to clearML server")
 
-        # Move output_path to tmp dir
-        temp_dir = Path(f"/tmp/{task.id}")
-
-        temp_dir.mkdir(parents=True, exist_ok=True)
-
-        new_path = temp_dir / Path(zip_filepath).name
-        Path(output_path).rename(new_path)
-
         task.upload_artifact(
             name=name,
-            artifact_object=new_path,
+            artifact_object=zip_filepath,
         )
         print("Complete upload package to clearML server")
     else:
