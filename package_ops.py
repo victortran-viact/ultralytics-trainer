@@ -55,7 +55,8 @@ def package_ops(
     model_arch: str,
     version: str,
     label_list:
-    list[str], output_path: Path
+    list[str],
+    model_path: Path,
 ) -> tuple[str, str]:
     '''
         Return: zip_filepath, zip_filepath
@@ -78,7 +79,7 @@ def package_ops(
             config_path=config_path,
             model_arch=model_arch,
         )
-        onnx_model_filepath = output_path
+        onnx_model_filepath = model_path,
 
         zip_filepath = Path(f"{model_arch}_{version}.zip")
         with zipfile.ZipFile(zip_filepath, "w") as zipf:
@@ -157,7 +158,7 @@ if __name__ == "__main__":
         print(f"Uploading to clearML server")
 
         task.upload_artifact(
-            name=name,
+            name="exported_model",
             artifact_object=zip_filepath,
         )
         print("Complete upload package to clearML server")
