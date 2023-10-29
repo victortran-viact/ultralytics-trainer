@@ -1,6 +1,6 @@
 import os
 
-from clearml import Dataset
+from clearml import Dataset, Task
 from ultralytics import YOLO
 
 
@@ -71,6 +71,7 @@ def get_dataset_zip_from_storage(dataset_id: str) -> str:
 
     dataset = Dataset.get(dataset_id=dataset_id)
     dataset_dir = _extract_dataset(dataset)
+    print(dataset_dir)
 
     # Assumpe there only 1 *.yaml file
     yaml_filepath: Path = _get_yaml_files(dataset_dir)[0]
@@ -106,7 +107,7 @@ def get_dataset_from_storage(dataset_id: str) -> str:
     folderpath = os.path.join(dataset_dir,dataset.name)
 
     from ultralytics import settings
-    settings.update({'dataset_dirs': dataset_dir})
+    settings.update({'datasets_dir': dataset_dir})
 
     os.makedirs(dataset_dir, exist_ok=True)
     os.makedirs(folderpath, exist_ok=True)
@@ -157,15 +158,30 @@ if __name__ == "__main__":
         "--model_version", default="yolov5s", help="Model version"
     )
     args.add_argument(
-        "--batch_size", default=16, help="Batch size"
+        "--batch_size", default=16, type=int, help="Batch size"
     )
     args.add_argument(
-        "--imgsz", default=640, help="Image size"
+        "--imgsz", default=640, help="Image size", type=int,
     )
     args.add_argument(
-        "--epochs", default=10, help="Epochs", type=int
+        "--epochs", default=10, help="Epochs", type=int,
     )
+
+    args.add_argument(
+        "--project", default="YOLOv5", help="ClearML Project Name",
+    )
+    args.add_argument(
+        "--name", default="Train YOLOv5", help="ClearML Task name",
+    )
+
     args = args.parse_args()
+
+    task = Task.current_task()
+    if task is None:
+        task = Task.init(
+            project_name=args.project,
+            task_name=args.name,
+        )
 
     train_yolo(
         dataset_id=args.dataset_id,
